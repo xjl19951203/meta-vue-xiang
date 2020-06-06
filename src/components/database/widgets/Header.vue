@@ -1,16 +1,11 @@
 <template>
-  <el-row class="Navigation">
-    <el-col :span="3">
+  <el-row class="Header">
+    <el-col :span="12">
       <router-link :to="{name: 'HomeIndex'}">
-        <i class="fa fa-fw fa-home" style="font-size: larger"></i> {{title}}
+        <i class="fa fa-fw fa-database" style="font-size: larger"></i> {{title}}
       </router-link>
     </el-col>
-    <el-col :span="18">
-      <router-link v-for="item in navListLeft" :key="item.index" :to="{name: item['name']}">
-        <i :class="'fa fa-fw fa-' + item['icon']"></i> {{item['title']}}
-      </router-link>
-    </el-col>
-    <el-col :span="3" style="text-align: right">
+    <el-col :span="12" style="text-align: right">
       <el-dropdown v-if="auth">
         <router-link class="el-dropdown-link"  :to="{name: 'PersonIndex'}">
           <i class="fa fa-fw fa-user"></i> {{auth['username']}}
@@ -37,6 +32,7 @@
         <i :class="'fa fa-fw fa-' + item['icon']"></i> {{item['title']}}
       </router-link>
     </el-col>
+    <div class="clear"></div>
   </el-row>
 </template>
 
@@ -50,7 +46,7 @@ export default {
   },
   data () {
     return {
-      title: '工艺数据库',
+      title: '基础制造工艺资源环境负荷数据库',
       navListLeft: [
         {
           title: '工艺场景',
@@ -100,16 +96,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  .Navigation{
-    height: 100%;
+  .Header{
+    padding: 0 20px;
+    height: 70px;
+    line-height: 70px;
+    background: #3c3c3c;
+    .title{
+      color: gold;
+      font-size: 20px;
+    }
     a{
       display: inline-block;
-      margin: 10px;
-      padding: 10px;
       color: #fff;
+      font-size: 18px;
     }
     .router-link-active{
       color: gold;
+    }
+    .clear{
+      clear: both;
     }
   }
 

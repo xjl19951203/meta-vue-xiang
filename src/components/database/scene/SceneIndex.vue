@@ -9,11 +9,11 @@
         <el-divider></el-divider>
         <el-form class="searchForm" ref="searchForm" :model="searchForm" :rules="searchRules">
         <el-form-item>
-          <el-radio-group v-model="searchForm.selectCategory" size="medium" @change="handleChange">
+          <el-radio-group v-model="searchForm.selectCategoryId" size="medium" @change="handleChange">
             <el-radio-button :label="''">
               所有分类
             </el-radio-button>
-            <el-radio-button v-for="item in categories[0]['children']" :label="item['id']" :key="item.index">
+            <el-radio-button v-for="item in categories" :label="item['id']" :key="item.index">
               {{item['title']}}
             </el-radio-button>    <!--直接从工艺场景分类表中读工艺类型，做成可选的单选按钮-->
           </el-radio-group>
@@ -102,103 +102,38 @@
         </el-table-column>
       </el-table>
       </div>
-      <el-drawer
-        class="SceneDetailDrawer"
-        :title="selectScene['title']"
-        :visible.sync="sceneDetailDrawer"
-        :size="'80%'"
-        :direction="'btt'">
-        <el-container>
-          <el-aside style="width: 25%">
-            <el-card class="box-card" style="margin: 20px 60px 20px 20px">
-              <el-button
-                type="warning"
-                style="width: 100%; height: 100%"
-                @click="handlePut(null, selectScene)">
-                  编辑工艺
-              </el-button>
-            </el-card>
-            <el-card class="box-card" style="margin: 20px 60px 20px 20px">
-              <div slot="header" class="clearfix">
-                <span>{{selectScene['title']}}</span>
-              </div>
-              <div class="text item">
-                所属分类：{{selectScene['category']['title']}}
-              </div>
-              <div class="text item">
-                创建时间：{{selectScene['createdAt']}}
-              </div>
-              <div class="text item">
-                最近更新：{{selectScene['updatedAt']}}
-              </div>
-              <div class="text item">
-                描述：{{selectScene['description']}}
-              </div>
-            </el-card>
-          </el-aside>
-          <el-main>
-            <Pane :scene="selectScene" :editable="false" :label="item.label" :tableName="item.tableName"
-             v-for="item in tabPaneList" :key="item.index"></Pane>
-             <div class="clearfix"></div>
-            <el-divider></el-divider>
-          </el-main>
-        </el-container>
-      </el-drawer>
     </el-main>
   </el-container>
 </template>
 
 <script>
 import api from 'api'
-import Pane from './widgets/Pane'
 export default {
-  name: 'SceneCategory',
-  components: {
-    Pane
-  },
+  name: 'SceneIndex',
   computed: {
     categories () {
-      return this.$store.state.categories
+      let temp = []
+      if (this.categoryId && this.$store.state.categories[0]) {
+        this.$store.state.categories[0]['children'].forEach(item => {
+          if (item['id'] === parseInt(this.categoryId)) {
+            temp = item['children']
+          }
+        })
+      }
+      return temp
     }
   },
   data () {
     return {
-      tabPaneList: [
-        {
-          label: '物料数据',
-          name: '1',
-          tableName: 'materialData'
-        },
-        {
-          label: '能源数据',
-          name: '2',
-          tableName: 'energyData'
-        },
-        {
-          label: '关键工艺参数',
-          name: '3',
-          tableName: 'materialData'
-        },
-        {
-          label: '设备数据',
-          name: '4',
-          tableName: 'deviceData'
-        },
-        {
-          label: '环境负荷数据',
-          name: '5',
-          tableName: 'envLoadData'
-        }
-      ],
       postCategoryList: [],
       selectScene: {
         category: {}
       },
-      sceneDetailDrawer: false,
+      categoryId: null,
       searchForm: {
         content: '',
         category: '',
-        selectCategory: null
+        selectCategoryId: null
       },
       searchRules: {},
       sceneList: [],
@@ -218,55 +153,38 @@ export default {
   // 然后根据同类工艺在工艺场景表里找工艺场景）
   beforeRouteEnter (to, from, next) {
     next(vm => {
-      if (to.query['category']) {
-        api.get({url: 'category/' + to.query['category']}).then(res => {
+      vm.categoryId = to.params['categoryId']
+      if (to.query['categoryId']) {
+        api.get({url: 'category/' + to.query['categoryId']}).then(res => {
           vm.sceneList = res['sceneDataList']
-          vm.searchForm.selectCategory = to.query['category'] ? to.query['category'] : ''
+          vm.searchForm.selectCategoryId = to.query['categoryId'] ? to.query['categoryId'] : ''
         })
       } else {
-        api.get({url: 'sceneData'}).then(result => {
-          vm.sceneList = result
-          vm.searchForm.selectCategory = to.query['category'] ? to.query['category'] : ''
+        api.get({url: 'category/' + to.params['categoryId']}).then(res => {
+          vm.sceneList = res['sceneDataList']
+          vm.searchForm.selectCategoryId = to.params['categoryId'] ? to.params['categoryId'] : ''
         })
-      }
-      if (to.query['id']) {
-        api.get({url: 'sceneData/' + to.query['id']}).then(res => {
-          vm.selectScene = res
-        })
-        vm.sceneDetailDrawer = true
       }
     })
   },
   beforeRouteUpdate (to, from, next) {
-    if (to.query['category']) {
-      api.get({url: 'category/' + to.query['category']}).then(res => {
+    this.categoryId = to.params['categoryId']
+    if (to.query['categoryId']) {
+      api.get({url: 'category/' + to.query['categoryId']}).then(res => {
         this.sceneList = res['sceneDataList']
-        this.searchForm.selectCategory = to.query['category'] ? to.query['category'] : ''
+        this.searchForm.selectCategoryId = to.query['categoryId'] ? to.query['categoryId'] : ''
       })
     } else {
-      api.get({url: 'sceneData'}).then(result => {
-        this.sceneList = result
-        this.searchForm.selectCategory = to.query['category'] ? to.query['category'] : ''
+      api.get({url: 'category/' + to.params['categoryId']}).then(res => {
+        this.sceneList = res['sceneDataList']
+        this.searchForm.selectCategoryId = to.params['categoryId'] ? to.params['categoryId'] : ''
       })
-    }
-    if (to.query['id']) {
-      api.get({url: 'sceneData/' + to.query['id']}).then(res => {
-        this.selectScene = res
-      })
-      this.sceneDetailDrawer = true
     }
     next()
   },
   methods: {
     handleDetailDrawer (index, row) {
-      let query = {}
-      for (let i in this.$route.query) {
-        query[i] = this.$route.query[i]
-      }
-      query['id'] = row['id']
-      // console.log(query['id'])
-      this.$router.push({name: 'SceneCategory', query: query})
-      // this.sceneDetailDrawer = true
+      this.$router.push({name: 'SceneDetail', params: {sceneId: row['id']}})
     },
     handlePost () {
       this.postSceneForm.categoryId = this.postCategoryList[this.postCategoryList.length - 1]
@@ -287,7 +205,7 @@ export default {
       console.log(index, row)
     },
     handleChange (value) {
-      this.$router.push({name: 'SceneCategory', query: {category: value || ''}})
+      this.$router.push({name: 'SceneIndex', query: {categoryId: value || ''}})
     }
   }
 }

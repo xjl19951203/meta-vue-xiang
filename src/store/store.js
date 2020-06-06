@@ -8,8 +8,9 @@ export default new Vuex.Store({
     },
     // root: 'http://114.115.238.65/api/',
     // root: 'http://10.1.1.230:8000/api/manage/',
-    root: 'http://localhost:8000/api/manage/',
-    // root: 'http://192.168.1.103:8000/api/manage/',
+    // root: 'http://localhost:8000/api/manage/',
+    root: 'http://39.106.151.147/api/manage/',
+    rootApi: 'http://39.106.151.147/api/',
     posting: false,
     pageLoading: false,
     scrollLoading: false,
@@ -20,7 +21,8 @@ export default new Vuex.Store({
     metadata: JSON.parse(localStorage.getItem('metadata')) || null,
     systemTable: JSON.parse(localStorage.getItem('systemTable')) || null,
     categories: JSON.parse(localStorage.getItem('categories')) || null,
-    baseTableMap: JSON.parse(localStorage.getItem('baseTableMap')) || null
+    baseTableMap: JSON.parse(localStorage.getItem('baseTableMap')) || null,
+    breadcrumbList: JSON.parse(localStorage.getItem('breadcrumbList')) || null
   },
   mutations: {
     clear (state) {
@@ -30,6 +32,10 @@ export default new Vuex.Store({
       state.systemTable = null
       state.categories = null
       state.baseTableMap = null
+    },
+    setBreadcrumbList (state, breadcrumbList) {
+      localStorage.setItem('breadcrumbList', JSON.stringify(breadcrumbList))
+      state.breadcrumbList = JSON.parse(localStorage.getItem('breadcrumbList'))
     },
     setSystemTime (state) {
       localStorage.setItem('systemTime', JSON.stringify(new Date().getTime()))
